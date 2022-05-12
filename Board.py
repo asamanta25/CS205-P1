@@ -17,6 +17,8 @@ class Board(object):
         self.children = []
         self.board_size = len(self.state)
         self.parent = parent
+        self.m_dist = -1
+        self.m_tile_count = -1
 
         self.empty_row = -1
         self.empty_col = -1
@@ -126,16 +128,19 @@ class Board(object):
 
         :return: The number of tiles that are misplaced.
         """
-        count = 0
+        if self.m_tile_count != -1:
+            return self.m_tile_count
+
+        self.m_tile_count = 0
         for row in range(self.board_size):
             for col in range(self.board_size):
 
                 # Increment count only if Board position is not an empty position
-                if (row != self.empty_row and col != self.empty_col) \
+                if (self.state[row][col] != 0) \
                         and (self.state[row][col] != Board.final[row][col]):
-                    count = count + 1
+                    self.m_tile_count = self.m_tile_count + 1
 
-        return count
+        return self.m_tile_count
 
     def manhattan_distance(self):
         """
@@ -143,7 +148,9 @@ class Board(object):
 
         :return: The Manhattan distance.
         """
-        manhattan_distance = 0
+        if self.m_dist != -1:
+            return self.m_dist
+        self.m_dist = 0
         for row in range(self.board_size):
             for col in range(self.board_size):
                 r = -1
@@ -158,8 +165,8 @@ class Board(object):
                     r = int(k / self.board_size)
                     c = (k % self.board_size) - 1
 
-                manhattan_distance = manhattan_distance + abs(r - row) + abs(c - col)
-        return manhattan_distance
+                self.m_dist = self.m_dist + abs(r - row) + abs(c - col)
+        return self.m_dist
 
     @property
     def board(self):
