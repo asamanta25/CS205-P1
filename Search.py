@@ -10,10 +10,6 @@ class Search(object):
         self.initial_state = initial_state
 
     def search(self):
-        if self.option == 0:
-            return self.uc()
-
-    def uc(self):
         nodes = []
         visited = []
 
@@ -27,7 +23,7 @@ class Search(object):
 
             # Test for goal state
             if b.is_final_state():
-                return cost
+                return b
 
             # Add the node to the visited state
             visited.append(b)
@@ -37,7 +33,7 @@ class Search(object):
 
             # Start adding to the heap
             for child in children:
-                heappush(nodes, (1 + cost, child))
+                heappush(nodes, (1 + cost + child.manhattan_distance(), child))
 
         # No solution, return.
         return None

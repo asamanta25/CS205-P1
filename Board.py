@@ -194,3 +194,10 @@ class Board(object):
         # Print the board states higher up in the Tree first
         Board.print_board_from_initial_state(board.parent)
         board.print_board()
+
+    @staticmethod
+    def get_cost(board):
+        if board is None:
+            return 0
+
+        return 1 + Board.get_cost(board.parent)
