@@ -22,8 +22,8 @@ class Board(object):
         self.empty_col = -1
 
         # Get empty board position
-        for row in range(len(self.state)):
-            for col in range(len(self.state)):
+        for row in range(self.board_size):
+            for col in range(self.board_size):
                 if self.state[row][col] == 0:
                     self.empty_row = row
                     self.empty_col = col
@@ -121,10 +121,45 @@ class Board(object):
         return self.state == Board.final
 
     def misplaced_tile(self):
-        pass
+        """
+        Return the number of misplaced tiles from the final state of the Board.
+
+        :return: The number of tiles that are misplaced.
+        """
+        count = 0
+        for row in range(self.board_size):
+            for col in range(self.board_size):
+
+                # Increment count only if Board position is not an empty position
+                if (row != self.empty_row and col != self.empty_col) \
+                        and (self.state[row][col] != Board.final[row][col]):
+                    count = count + 1
+
+        return count
 
     def manhattan_distance(self):
-        pass
+        """
+        Return the Manhattan distance of the board from the final solved state.
+
+        :return: The Manhattan distance.
+        """
+        manhattan_distance = 0
+        for row in range(self.board_size):
+            for col in range(self.board_size):
+                r = -1
+                c = -1
+                k = self.state[row][col]
+                if k == 0:
+                    continue
+                if k % self.board_size == 0:
+                    r = (k / self.board_size) - 1
+                    c = self.board_size - 1
+                else:
+                    r = int(k / self.board_size)
+                    c = (k % self.board_size) - 1
+
+                manhattan_distance = manhattan_distance + abs(r - row) + abs(c - col)
+        return manhattan_distance
 
     @property
     def board(self):
