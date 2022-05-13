@@ -22,6 +22,14 @@ class Search(object):
         self.initial_state = initial_state
 
     def search(self):
+        if self.algorithm == UNIFORM_COST:
+            return self.uc_search()
+        elif self.algorithm == A_STAR:
+            return self.astar_search()
+
+        return None
+
+    def uc_search(self):
         nodes = []
         visited = set()
 
@@ -45,16 +53,51 @@ class Search(object):
 
             # Start adding to the heap
             for child in children:
+                heappush(nodes, (1 + cost, child))
 
-                heuristic_cost = 0
-                # Get the heuristic cost if algorithm is A*
-                if self.algorithm == A_STAR:
+        # No solution, return.
+        return None
+
+    def astar_search(self):
+        nodes = []
+        board_start = Board(self.initial_state, None)
+        g_score = dict()
+        g_score[board_start] = 0
+
+        # Push the first node into the heap.
+        heappush(nodes, (0, board_start))
+
+        while len(nodes) > 0:
+
+            # Pop the cheapest node
+            (cost, b) = heappop(nodes)
+
+            if b.is_final_state():
+                return b
+
+            # Generate more nodes
+            children = b.generate_children(None)
+
+            # Start adding to the heap
+            for child in children:
+
+                new_score = 1 + g_score[b]
+                if child not in g_score.keys():
+                    g_score[child] = 100000000
+
+                if new_score < g_score[child]:
+                    g_score[child] = new_score
+
+                    # Get the heuristic cost
+                    heuristic_cost = 0
                     if self.heuristic == MANHATTAN_DISTANCE:
                         heuristic_cost = child.manhattan_distance()
-                    else:
+                    elif self.heuristic == MISPLACED_TILE:
                         heuristic_cost = child.misplaced_tile()
 
-                heappush(nodes, (1 + cost + heuristic_cost, child))
+                    total_cost = g_score[child] + heuristic_cost
+
+                    heappush(nodes, (total_cost, child))
 
         # No solution, return.
         return None

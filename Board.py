@@ -112,12 +112,14 @@ class Board(object):
 
             # Check if a board has already been visited
             bo = Board(b, self)
-            found = bo in visited
+            found = False
+            if visited is not None:
+                found = bo in visited
 
             # Only add to the set of children if Node was not
             # visited earlier.
             if not found:
-                self.children.append(bo)
+                self.children.append(Board(b, self))
 
         return self.children
 
