@@ -61,8 +61,9 @@ class Search(object):
     def astar_search(self):
         nodes = []
         board_start = Board(self.initial_state, None)
-        g_score = dict()
-        g_score[board_start] = 0
+        g_x = dict()
+        g_x[board_start] = 0
+        visited = set()
 
         # Push the first node into the heap.
         heappush(nodes, (0, board_start))
@@ -81,23 +82,26 @@ class Search(object):
             # Start adding to the heap
             for child in children:
 
-                new_score = 1 + g_score[b]
-                if child not in g_score.keys():
-                    g_score[child] = 100000000
+                new_g_x = 1 + g_x[b]
+                if child not in g_x.keys():
+                    g_x[child] = 100000000
 
-                if new_score < g_score[child]:
-                    g_score[child] = new_score
+                if new_g_x < g_x[child]:
+                    g_x[child] = new_g_x
 
                     # Get the heuristic cost
-                    heuristic_cost = 0
+                    h_x = 0
                     if self.heuristic == MANHATTAN_DISTANCE:
-                        heuristic_cost = child.manhattan_distance()
+                        h_x = child.manhattan_distance()
                     elif self.heuristic == MISPLACED_TILE:
-                        heuristic_cost = child.misplaced_tile()
+                        h_x = child.misplaced_tile()
 
-                    total_cost = g_score[child] + heuristic_cost
+                    total_cost = g_x[child] + h_x
 
-                    heappush(nodes, (total_cost, child))
+                    n = (total_cost, child)
+                    if n not in visited:
+                        heappush(nodes, (total_cost, child))
+                        visited.add(n)
 
         # No solution, return.
         return None

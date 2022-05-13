@@ -100,17 +100,7 @@ class TestSearch(TestCase):
         self.search(UNIFORM_COST, 0)
 
     def test_a_star_manhattan_distance_search(self):
-        for test_case in TestSearch.TESTS:
-            (test_board, test_depth) = test_case
-            s = Search(A_STAR, MANHATTAN_DISTANCE, test_board)
-            b = s.search()
-            assert b is not None
-            assert Board.get_cost(b.parent) == test_depth
+        self.search(A_STAR, MANHATTAN_DISTANCE)
 
     def test_a_star_misplaced_tile_search(self):
-        for test_case in TestSearch.TESTS:
-            (test_board, test_depth) = test_case
-            s = Search(A_STAR, MISPLACED_TILE, test_board)
-            b = s.search()
-            assert b is not None
-            assert Board.get_cost(b.parent) == test_depth
+        self.search(A_STAR, MISPLACED_TILE)
