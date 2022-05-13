@@ -19,6 +19,7 @@ class Board(object):
         self.parent = parent
         self.m_dist = -1
         self.m_tile_count = -1
+        self._hash = None
 
         self.empty_row = -1
         self.empty_col = -1
@@ -40,6 +41,14 @@ class Board(object):
 
     def __le__(self, other):
         return True
+
+    def __hash__(self):
+        if self._hash is None:
+            k = []
+            for i in self.state:
+                k.append(tuple(i))
+            self._hash = hash(tuple(k))
+        return self._hash
 
     def print_board(self):
         """
@@ -102,15 +111,13 @@ class Board(object):
                 continue
 
             # Check if a board has already been visited
-            found = False
-            for node in visited:
-                if node.state == b:
-                    found = True
+            bo = Board(b, self)
+            found = bo in visited
 
             # Only add to the set of children if Node was not
             # visited earlier.
             if not found:
-                self.children.append(Board(b, self))
+                self.children.append(bo)
 
         return self.children
 
@@ -201,3 +208,9 @@ class Board(object):
             return 0
 
         return 1 + Board.get_cost(board.parent)
+
+    @staticmethod
+    def get_board_size(size):
+        for i in size:
+            for j in size:
+                Board.final[i][j] = (i * size) + j + 1
