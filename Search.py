@@ -29,6 +29,7 @@ class Search(object):
         self.count_nodes_expanded = 0
         self.start_time = 0
         self.end_time = 0
+        self.visited = dict()
 
     def get_heuristic_cost(self, node):
         """
@@ -50,16 +51,70 @@ class Search(object):
 
         return heuristic_cost
 
-    @staticmethod
-    def expand(board, visited):
-        """
-        Function to expand a particular board.
+    # @staticmethod
+    # def expand(board, visited):
+    #     """
+    #     Function to expand a particular board.
+    #
+    #     :param board: The board to expand.
+    #     :param visited: The set of visited states.
+    #     :return: The set of expanded states.
+    #     """
+    #     return board.generate_children(visited)
 
-        :param board: The board to expand.
-        :param visited: The set of visited states.
-        :return: The set of expanded states.
-        """
-        return board.generate_children(visited)
+    def make_queue(self, node):
+        nodes = []
+        heappush(nodes, node)
+        return nodes
+
+    def make_node(self, state):
+        cost, board_state, parent = state
+        b = Board(board_state, parent)
+        b.cost = cost
+        if self.algorithm == A_STAR:
+            if self.heuristic == MANHATTAN_DISTANCE:
+                b.cost = b.cost + b.manhattan_distance()
+            elif self.heuristic == MISPLACED_TILE:
+                b.cost = b.cost + b.misplaced_tile()
+        return b
+
+    def empty(self, nodes):
+        return len(nodes) == 0
+
+    def remove_front(self, nodes):
+        return heappop(nodes)
+
+    def queuing_function(self, nodes, children):
+        for child in children:
+            if self.algorithm == UNIFORM_COST:
+                heappush(nodes, child)
+        return nodes
+
+    def expand(self, node, operators):
+        self.visited[node] = node.cost
+        return node.generate_children(self.visited)
+
+    def general_search(self, queuing_function):
+        problem_initial_state = 0, self.initial_state, None
+
+        # Insert the first node into the queue
+        nodes = self.make_queue(self.make_node(problem_initial_state))
+
+        while True:
+            # Check if there are no more states to expand.
+            # If None, then there's no solution to the problem's
+            # initial state.
+            if self.empty(nodes):
+                return None
+
+            # Remove the cheapest node from the list of nodes
+            node = self.remove_front(nodes)
+
+            # Get the cost & the board from the node
+            if node.goal_test(node.state):
+                return node
+
+            nodes = self.queuing_function(nodes, self.expand(node, None))
 
     def uc_search(self):
         """
@@ -199,6 +254,7 @@ class Search(object):
         self.count_nodes_expanded = 0
         self.start_time = 0
         self.end_time = 0
+        self.visited.clear()
 
         final_node = None
         if self.algorithm == UNIFORM_COST:

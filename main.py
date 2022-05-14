@@ -1,3 +1,4 @@
+import Board
 from Search import Search, A_STAR
 
 
@@ -22,4 +23,5 @@ if __name__ == "__main__":
 
     s = Search(algorithm, heuristic, [row1, row2, row3])
 
-    n = s.search()
+    n = s.general_search(None)
+    print(n.cost)

@@ -13,13 +13,14 @@ class Board(object):
     ]
 
     def __init__(self, state, parent):
-        self.state = state
+        self._state = state
         self.children = []
         self.board_size = len(self.state)
         self.parent = parent
         self.m_dist = -1
         self.m_tile_count = -1
         self._hash = None
+        self._cost = 0
 
         self.empty_row = -1
         self.empty_col = -1
@@ -34,13 +35,13 @@ class Board(object):
         self.valid_positions = []
 
     def __eq__(self, other):
-        return self.state == other.board
+        return self.state == other.state
 
     def __lt__(self, other):
-        return False
+        return self.cost < other.cost
 
     def __le__(self, other):
-        return True
+        return self.cost <= other.cost
 
     def __hash__(self):
         if self._hash is None:
@@ -103,7 +104,7 @@ class Board(object):
 
         # Swap the blank space with the valid positions that we previously got.
         for position in self.valid_positions:
-            b = copy.deepcopy(self.state)
+            b = copy.deepcopy(self._state)
             row, col = position
             b[self.empty_row][self.empty_col] = b[row][col]
             b[row][col] = 0
@@ -111,15 +112,16 @@ class Board(object):
                 continue
 
             # Check if a board has already been visited
-            bo = Board(b, self)
+            child = Board(b, self)
+            child.cost = self.cost + 1
             found = False
             if visited is not None:
-                found = bo in visited
+                found = child in visited
 
             # Only add to the set of children if Node was not
             # visited earlier.
             if not found:
-                self.children.append(Board(b, self))
+                self.children.append(child)
 
         return self.children
 
@@ -129,7 +131,7 @@ class Board(object):
 
         :return: Boolean indicating whether Board is the final state or not.
         """
-        return self.state == Board.final
+        return self._state == Board.final
 
     def misplaced_tile(self):
         """
@@ -145,8 +147,8 @@ class Board(object):
             for col in range(self.board_size):
 
                 # Increment count only if Board position is not an empty position
-                if (self.state[row][col] != 0) \
-                        and (self.state[row][col] != Board.final[row][col]):
+                if (self._state[row][col] != 0) \
+                        and (self._state[row][col] != Board.final[row][col]):
                     self.m_tile_count = self.m_tile_count + 1
 
         return self.m_tile_count
@@ -164,7 +166,7 @@ class Board(object):
             for col in range(self.board_size):
                 r = -1
                 c = -1
-                k = self.state[row][col]
+                k = self._state[row][col]
                 if k == 0:
                     continue
                 if k % self.board_size == 0:
@@ -178,8 +180,20 @@ class Board(object):
         return self.m_dist
 
     @property
-    def board(self):
-        return self.state
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, value):
+        self._state = value
+
+    @property
+    def cost(self):
+        return self._cost
+
+    @cost.setter
+    def cost(self, value):
+        self._cost = value
 
     @property
     def parent(self):
@@ -223,3 +237,6 @@ class Board(object):
         for i in size:
             for j in size:
                 Board.final[i][j] = (i * size) + j + 1
+
+    def goal_test(self, state):
+        return self.is_final_state()
