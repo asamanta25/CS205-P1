@@ -1,9 +1,7 @@
-import Board
+from Board import Board
 from Search import Search, A_STAR
 
-
-if __name__ == "__main__":
-
+def get_input():
     print("Finding a solution to a provided 8-Puzzle using Uniform Cost Search & A*.")
     algorithm = int(input("Please enter the Algorithm (0 - Uniform Cost, 1 - A*): "))
     heuristic = 0
@@ -21,7 +19,16 @@ if __name__ == "__main__":
     row2 = [int(i) for i in row2]
     row3 = [int(i) for i in row3]
 
-    s = Search(algorithm, heuristic, [row1, row2, row3])
+    return [row1, row2, row3]
+
+
+if __name__ == "__main__":
+
+    s = Search(1, 1, [
+                [0, 7, 2],
+                [4, 6, 1],
+                [3, 5, 8]
+            ])# get_input())
 
     n = s.general_search(None)
-    print(n.cost)
+    print(Board.get_cost(n.parent))

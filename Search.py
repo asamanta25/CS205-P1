@@ -87,7 +87,19 @@ class Search(object):
     def queuing_function(self, nodes, children):
         for child in children:
             if self.algorithm == UNIFORM_COST:
-                heappush(nodes, child)
+                child.cost = 1 + child.parent.cost
+            elif self.algorithm == A_STAR:
+                # Parameters for calculating cost of the child node
+                g_x = 1 + child.depth
+                h_x = 0
+                if self.heuristic == MANHATTAN_DISTANCE:
+                    h_x = child.manhattan_distance()
+                elif self.heuristic == MISPLACED_TILE:
+                    h_x = child.misplaced_tile()
+                child.cost = g_x + h_x
+
+            heappush(nodes, child)
+
         return nodes
 
     def expand(self, node, operators):
@@ -116,46 +128,46 @@ class Search(object):
 
             nodes = self.queuing_function(nodes, self.expand(node, None))
 
-    def uc_search(self):
-        """
-        Perform Uniform Cost Search.
-
-        :return: The final node if solution found. Otherwise, None.
-        """
-        nodes = []
-        visited = set()
-
-        # Push the first node into the heap.
-        heappush(nodes, (0, Board(self.initial_state, None)))
-
-        while len(nodes) > 0:
-
-            # Pop the cheapest node
-            (cost, b) = heappop(nodes)
-
-            # Test for goal state
-            if b.is_final_state():
-                return b
-
-            # Add the node to the visited state
-            visited.add(b)
-
-            # Generate more nodes
-            children = Search.expand(b, visited)
-
-            # Update count of nodes expanded
-            self.count_nodes_expanded = self.count_nodes_expanded + 1
-
-            # Start adding to the heap
-            for child in children:
-                heappush(nodes, (1 + cost, child))
-
-            # Update the max queue size
-            if len(nodes) > self.max_queue_size:
-                self.max_queue_size = len(nodes)
-
-        # No solution, return.
-        return None
+    # def uc_search(self):
+    #     """
+    #     Perform Uniform Cost Search.
+    #
+    #     :return: The final node if solution found. Otherwise, None.
+    #     """
+    #     nodes = []
+    #     visited = set()
+    #
+    #     # Push the first node into the heap.
+    #     heappush(nodes, (0, Board(self.initial_state, None)))
+    #
+    #     while len(nodes) > 0:
+    #
+    #         # Pop the cheapest node
+    #         (cost, b) = heappop(nodes)
+    #
+    #         # Test for goal state
+    #         if b.is_final_state():
+    #             return b
+    #
+    #         # Add the node to the visited state
+    #         visited.add(b)
+    #
+    #         # Generate more nodes
+    #         children = Search.expand(b, visited)
+    #
+    #         # Update count of nodes expanded
+    #         self.count_nodes_expanded = self.count_nodes_expanded + 1
+    #
+    #         # Start adding to the heap
+    #         for child in children:
+    #             heappush(nodes, (1 + cost, child))
+    #
+    #         # Update the max queue size
+    #         if len(nodes) > self.max_queue_size:
+    #             self.max_queue_size = len(nodes)
+    #
+    #     # No solution, return.
+    #     return None
 
     def astar_search(self):
         """
@@ -259,11 +271,11 @@ class Search(object):
         final_node = None
         if self.algorithm == UNIFORM_COST:
             self.start_time = time.time()
-            final_node = self.uc_search()
+            final_node = self.general_search(self.queuing_function)
             self.end_time = time.time()
         elif self.algorithm == A_STAR:
             self.start_time = time.time()
-            final_node = self.astar_search()
+            final_node = self.general_search(self.queuing_function)
             self.end_time = time.time()
 
         self.print_search_stats(final_node)

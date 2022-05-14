@@ -21,6 +21,7 @@ class Board(object):
         self.m_tile_count = -1
         self._hash = None
         self._cost = 0
+        self._depth = 0
 
         self.empty_row = -1
         self.empty_col = -1
@@ -38,10 +39,9 @@ class Board(object):
         return self.state == other.state
 
     def __lt__(self, other):
+        if (self.cost == other.cost) and (self.state == other.state):
+            return self.depth < other.depth
         return self.cost < other.cost
-
-    def __le__(self, other):
-        return self.cost <= other.cost
 
     def __hash__(self):
         if self._hash is None:
@@ -113,7 +113,7 @@ class Board(object):
 
             # Check if a board has already been visited
             child = Board(b, self)
-            child.cost = self.cost + 1
+            child.depth = 1 + self.depth
             found = False
             if visited is not None:
                 found = child in visited
@@ -178,6 +178,14 @@ class Board(object):
 
                 self.m_dist = self.m_dist + abs(r - row) + abs(c - col)
         return self.m_dist
+
+    @property
+    def depth(self):
+        return self._depth
+
+    @depth.setter
+    def depth(self, value):
+        self._depth = value
 
     @property
     def state(self):
