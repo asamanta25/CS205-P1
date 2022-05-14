@@ -50,6 +50,17 @@ class Search(object):
 
         return heuristic_cost
 
+    @staticmethod
+    def expand(board, visited):
+        """
+        Function to expand a particular board.
+
+        :param board: The board to expand.
+        :param visited: The set of visited states.
+        :return: The set of expanded states.
+        """
+        return board.generate_children(visited)
+
     def uc_search(self):
         """
         Perform Uniform Cost Search.
@@ -75,7 +86,7 @@ class Search(object):
             visited.add(b)
 
             # Generate more nodes
-            children = b.generate_children(visited)
+            children = Search.expand(b, visited)
 
             # Update count of nodes expanded
             self.count_nodes_expanded = self.count_nodes_expanded + 1
@@ -117,7 +128,7 @@ class Search(object):
                 return b
 
             # Generate more nodes
-            children = b.generate_children(None)
+            children = Search.expand(b, None)
 
             # Update count of nodes expanded
             self.count_nodes_expanded = self.count_nodes_expanded + 1
