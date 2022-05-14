@@ -1,10 +1,9 @@
 from Search import Search, A_STAR
 
-from Board import Board
-
 
 if __name__ == "__main__":
 
+    print("Finding a solution to a provided 8-Puzzle using Uniform Cost Search & A*.")
     algorithm = int(input("Please enter the Algorithm (0 - Uniform Cost, 1 - A*): "))
     heuristic = 0
     if algorithm == A_STAR:
@@ -13,11 +12,14 @@ if __name__ == "__main__":
     else:
         print("Uniform Cost Algorithm selected.")
 
-    s = Search(algorithm, heuristic, [
-            [8, 1, 2],
-            [0, 4, 3],
-            [7, 6, 5]
-        ]
-    )
+    row1 = input("Enter row 1: ").split()
+    row2 = input("Enter row 2: ").split()
+    row3 = input("Enter row 3: ").split()
+
+    row1 = [int(i) for i in row1]
+    row2 = [int(i) for i in row2]
+    row3 = [int(i) for i in row3]
+
+    s = Search(algorithm, heuristic, [row1, row2, row3])
+
     n = s.search()
-    print(Board.get_cost(n.parent))

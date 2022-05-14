@@ -206,6 +206,13 @@ class Board(object):
 
     @staticmethod
     def get_cost(board):
+        """
+        Get the cost of a solved state recursively by adding 1 to the cost
+        until the root node is reached.
+
+        :param board: Board for which cost is required.
+        :return: 1 + the cost of the parent node.
+        """
         if board is None:
             return 0
 
