@@ -13,20 +13,22 @@ class Board(object):
     ]
 
     def __init__(self, state, parent):
-        self._state = state
-        self.children = []
-        self.board_size = len(self.state)
-        self.parent = parent
+        # Heuristics parameters
         self.m_dist = -1
         self.m_tile_count = -1
+
+        # Node parameters
+        self._parent = parent
         self._hash = None
         self._cost = 0
         self._depth = 0
-
-        self.empty_row = -1
-        self.empty_col = -1
+        self._state = state
+        self.children = []
+        self.board_size = len(self.state)
 
         # Get empty board position
+        self.empty_row = -1
+        self.empty_col = -1
         for row in range(self.board_size):
             for col in range(self.board_size):
                 if self.state[row][col] == 0:
@@ -36,16 +38,39 @@ class Board(object):
         self.valid_positions = []
 
     def __eq__(self, other):
+        """
+        Overload the == operator. Compare whether one board is equal to
+        another board or not.
+
+        :param other: The board to be compared with.
+        :return: Whether the 2 boards are equal nor not.
+        """
         return self.state == other.state
 
     def __lt__(self, other):
+        """
+        Check if one board is less than another board. The cost of the board needs to be considered.
+
+        :param other: The board to be compared with.
+        :return: Whether one board is less than another one.
+        """
+
+        # Need to compare the costs. If the cost and the boards are the same, the depth needs to be compared.
         if (self.cost == other.cost) and (self.state == other.state):
             return self.depth < other.depth
         return self.cost < other.cost
 
     def __hash__(self):
+        """
+        Compute a hash value of the board. This is needed because a set can't hash iterable objects and
+        list is an iterable object.
+
+        :return: A hash value of the board.
+        """
         if self._hash is None:
             k = []
+            # Convert each row into a tuple and then create a tuple of tuples where each tuple is a row.
+            # Return the has. This conversion is required because the hash function can't work with lists.
             for i in self.state:
                 k.append(tuple(i))
             self._hash = hash(tuple(k))
@@ -73,9 +98,13 @@ class Board(object):
 
     def get_surrounding_valid_positions(self):
         """
-        Get surrounding positions for the position passed.
+        Get surrounding positions for the position passed. Collect the valid positions for a board.
+        Considering that (i, j) is position of the missing tile on the board, the only valid positions would be
+        (i - 1, j), (i + 1, j), (i, j - 1) and (i, j + 1). If the boundaries are kept in check, it can be observed that
+        all the valid positions are either in the missing tile row or in the missing tile column. The for loop bellow
+        collects all the positions that either are in the missing tile row or in the missing tile column.
 
-        :return:
+        :return: A list of valid positions.
         """
 
         # row + 2 & col + 2 because range will then return values up to row + 1
@@ -94,22 +123,25 @@ class Board(object):
 
     def generate_children(self, visited):
         """
+        Generate the children for the current puzzle.
 
-        :return:
+        :return: the list of children.
         """
         if len(self.children) != 0:
             return self.children
 
+        # Get the valid positions where the missing tile could be
         self.get_surrounding_valid_positions()
 
-        # Swap the blank space with the valid positions that we previously got.
+        # Swap the blank space with the valid positions previously obtained.
         for position in self.valid_positions:
             b = copy.deepcopy(self._state)
             row, col = position
             b[self.empty_row][self.empty_col] = b[row][col]
             b[row][col] = 0
-            if self.parent and self.parent.state == b:
-                continue
+
+            # if self.parent and self.parent.state == b:
+            #     continue
 
             # Check if a board has already been visited
             child = Board(b, self)
@@ -125,7 +157,7 @@ class Board(object):
 
         return self.children
 
-    def is_final_state(self):
+    def goal_test(self, state):
         """
         Check if the current board is the final solved state of the Board.
 
@@ -142,6 +174,7 @@ class Board(object):
         if self.m_tile_count != -1:
             return self.m_tile_count
 
+        # Iterate over the final board and the current board and check which tiles are misplaced.
         self.m_tile_count = 0
         for row in range(self.board_size):
             for col in range(self.board_size):
@@ -161,6 +194,9 @@ class Board(object):
         """
         if self.m_dist != -1:
             return self.m_dist
+
+        # For each of the misplaced tiles, just need to take the absolute difference between the
+        # rows and the columns and add them up.
         self.m_dist = 0
         for row in range(self.board_size):
             for col in range(self.board_size):
@@ -179,6 +215,7 @@ class Board(object):
                 self.m_dist = self.m_dist + abs(r - row) + abs(c - col)
         return self.m_dist
 
+    # Properties of this class
     @property
     def depth(self):
         return self._depth
@@ -227,7 +264,7 @@ class Board(object):
         board.print_board()
 
     @staticmethod
-    def get_cost(board):
+    def get_depth(board):
         """
         Get the cost of a solved state recursively by adding 1 to the cost
         until the root node is reached.
@@ -238,13 +275,16 @@ class Board(object):
         if board is None:
             return 0
 
-        return 1 + Board.get_cost(board.parent)
+        return 1 + Board.get_depth(board.parent)
 
     @staticmethod
-    def get_board_size(size):
+    def get_board_for_size(size):
+        """
+        Create a solved board based on the size provided. Ex - if size = 5, return a solved 24-Puzzle.
+
+        :param size: No. of elements in one row.
+        :return: A solved N-Puzzle.
+        """
         for i in size:
             for j in size:
                 Board.final[i][j] = (i * size) + j + 1
-
-    def goal_test(self, state):
-        return self.is_final_state()

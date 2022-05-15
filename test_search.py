@@ -1,7 +1,29 @@
 from unittest import TestCase
 
-from Board import Board
-from Search import Search, A_STAR, UNIFORM_COST, MANHATTAN_DISTANCE, MISPLACED_TILE
+from search import Search, A_STAR, UNIFORM_COST, MANHATTAN_DISTANCE, MISPLACED_TILE
+
+
+def search(algorithm, heuristic):
+    """
+    Static function for searching.
+
+    :param algorithm: Algorithm to use.
+    :param heuristic: Heuristic to use.
+    :return:
+    """
+    # Test cases that can be solved
+    for test_case in TestSearch.TESTS:
+        (test_board, test_depth) = test_case
+        s = Search(algorithm, heuristic, test_board)
+        b = s.search()
+        assert b is not None
+        assert b.depth == test_depth
+
+    # Test cases that can't be solved
+    for test_case in TestSearch.TESTS_NO_SOLUTION:
+        s = Search(algorithm, heuristic, test_case)
+        b = s.search()
+        assert b is None
 
 
 class TestSearch(TestCase):
@@ -70,7 +92,15 @@ class TestSearch(TestCase):
                 [3, 5, 8]
             ],
             24
-        )
+        ),
+        (
+            [
+                [7, 5, 3],
+                [6, 2, 1],
+                [4, 8, 0]
+            ],
+            24
+        ),
     ]
 
     TESTS_NO_SOLUTION = [
@@ -81,26 +111,11 @@ class TestSearch(TestCase):
         ]
     ]
 
-    def search(self, algorithm, heuristic):
-        # Test cases that can be solved
-        for test_case in TestSearch.TESTS:
-            (test_board, test_depth) = test_case
-            s = Search(algorithm, heuristic, test_board)
-            b = s.search()
-            assert b is not None
-            assert Board.get_cost(b.parent) == test_depth
-
-        # Test cases that can't be solved
-        for test_case in TestSearch.TESTS_NO_SOLUTION:
-            s = Search(algorithm, heuristic, test_case)
-            b = s.search()
-            assert b is None
-
     def test_uc_search(self):
-        self.search(UNIFORM_COST, 0)
+        search(UNIFORM_COST, 0)
 
     def test_a_star_manhattan_distance_search(self):
-        self.search(A_STAR, MANHATTAN_DISTANCE)
+        search(A_STAR, MANHATTAN_DISTANCE)
 
     def test_a_star_misplaced_tile_search(self):
-        self.search(A_STAR, MISPLACED_TILE)
+        search(A_STAR, MISPLACED_TILE)

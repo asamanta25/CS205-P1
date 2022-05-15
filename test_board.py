@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from Board import Board
+from board import Board
+
 
 class TestBoard(TestCase):
     def test_get_surrounding_valid_positions(self):
