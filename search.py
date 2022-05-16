@@ -77,7 +77,14 @@ class Search(object):
         :param nodes: The list of nodes from which the cheapest node needs to be popped.
         :return: The cheapest node.
         """
-        return heappop(nodes)
+        node = heappop(nodes)
+        if self.algorithm == A_STAR:
+            print("The best state to expand with a g(n) = {} and h(n) = {} is...".format(node.depth,
+                                                                                         node.cost - node.depth))
+        elif self.algorithm == UNIFORM_COST:
+            print("The best state to expand with a g(n) = {} is...".format(node.depth))
+        node.print_board()
+        return node
 
     def queuing_function(self, nodes, children):
         """
