@@ -56,7 +56,7 @@ class Board(object):
         """
 
         # Need to compare the costs. If the cost and the boards are the same, the depth needs to be compared.
-        if (self.cost == other.cost) and (self.state == other.state):
+        if (self.cost == other.cost):
             return self.depth < other.depth
         return self.cost < other.cost
 
